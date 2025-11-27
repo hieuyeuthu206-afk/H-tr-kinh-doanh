@@ -10,64 +10,171 @@ import {
   TrendingDown
 } from 'lucide-react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { getStorageItem, StorageKeys } from '@/utils/storage'
 
-const stats = [
-  {
-    name: 'Doanh thu',
-    value: '125,000,000',
-    change: '+12.5%',
-    trend: 'up',
-    icon: DollarSign,
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
-  },
-  {
-    name: 'Đơn hàng',
-    value: '1,234',
-    change: '+8.2%',
-    trend: 'up',
-    icon: ShoppingCart,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
-  },
-  {
-    name: 'Khách hàng',
-    value: '5,678',
-    change: '+15.3%',
-    trend: 'up',
-    icon: Users,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
-  },
-  {
-    name: 'Sản phẩm',
-    value: '890',
-    change: '+5.1%',
-    trend: 'up',
-    icon: Package,
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50',
-  },
-]
+interface Product {
+  id: number
+  name: string
+  category: string
+  price: number
+  stock: number
+  status: 'active' | 'inactive'
+}
 
-const salesData = [
-  { month: 'Tháng 1', sales: 4000, orders: 240 },
-  { month: 'Tháng 2', sales: 3000, orders: 198 },
-  { month: 'Tháng 3', sales: 5000, orders: 320 },
-  { month: 'Tháng 4', sales: 4500, orders: 280 },
-  { month: 'Tháng 5', sales: 6000, orders: 380 },
-  { month: 'Tháng 6', sales: 5500, orders: 350 },
-]
+interface Customer {
+  id: number
+  name: string
+  email: string
+  phone: string
+  address: string
+  totalOrders: number
+  totalSpent: number
+}
 
-const topProducts = [
-  { name: 'Sản phẩm A', sales: 1250, revenue: 25000000 },
-  { name: 'Sản phẩm B', sales: 980, revenue: 19600000 },
-  { name: 'Sản phẩm C', sales: 750, revenue: 15000000 },
-  { name: 'Sản phẩm D', sales: 620, revenue: 12400000 },
-  { name: 'Sản phẩm E', sales: 540, revenue: 10800000 },
-]
+interface Order {
+  id: number
+  customerName: string
+  products: string
+  total: number
+  date: string
+  status: 'pending' | 'processing' | 'completed' | 'cancelled'
+}
 
 export default function Dashboard() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [orders, setOrders] = useState<Order[]>([])
+
+  // Load dữ liệu từ localStorage
+  useEffect(() => {
+    const savedProducts = getStorageItem<any[]>(StorageKeys.PRODUCTS, [])
+    const savedCustomers = getStorageItem<any[]>(StorageKeys.CUSTOMERS, [])
+    const savedOrders = getStorageItem<any[]>(StorageKeys.ORDERS, [])
+
+    setProducts(savedProducts.map(p => ({
+      ...p,
+      status: (p.status === 'active' || p.status === 'inactive') ? p.status : 'inactive'
+    })))
+
+    setCustomers(savedCustomers)
+    setOrders(savedOrders)
+  }, [])
+
+  // Tính toán số liệu thực tế
+  const totalRevenue = orders
+    .filter(order => order.status === 'completed')
+    .reduce((sum, order) => sum + (order.total || 0), 0)
+
+  const totalOrders = orders.length
+  const totalCustomers = customers.length
+  const totalProducts = products.length
+
+  // Tính toán doanh thu theo tháng (6 tháng gần nhất)
+  const getMonthlyData = () => {
+    const months = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6']
+    const currentMonth = new Date().getMonth()
+    
+    return months.map((monthName, index) => {
+      const monthIndex = (currentMonth - 5 + index + 12) % 12
+      const year = new Date().getFullYear()
+      const monthStart = new Date(year, monthIndex, 1)
+      const monthEnd = new Date(year, monthIndex + 1, 0)
+      
+      const monthOrders = orders.filter(order => {
+        const orderDate = new Date(order.date)
+        return orderDate >= monthStart && orderDate <= monthEnd
+      })
+
+      const monthRevenue = monthOrders
+        .filter(order => order.status === 'completed')
+        .reduce((sum, order) => sum + (order.total || 0), 0)
+
+      return {
+        month: monthName,
+        sales: monthRevenue,
+        orders: monthOrders.length
+      }
+    })
+  }
+
+  const salesData = getMonthlyData()
+
+  // Tính toán top products từ orders
+  const getTopProducts = () => {
+    const productSales: { [key: string]: { sales: number, revenue: number } } = {}
+
+    orders
+      .filter(order => order.status === 'completed')
+      .forEach(order => {
+        // Parse products từ string (ví dụ: "Sản phẩm A x2, Sản phẩm B x1")
+        const productMatches = order.products.match(/(.+?)\s+x(\d+)/g) || []
+        
+        productMatches.forEach(match => {
+          const [, productName, quantity] = match.match(/(.+?)\s+x(\d+)/) || []
+          const qty = parseInt(quantity) || 1
+          
+          // Tìm giá sản phẩm từ products list
+          const product = products.find(p => p.name === productName.trim())
+          const productPrice = product?.price || 0
+          const revenue = productPrice * qty
+
+          if (productName) {
+            if (!productSales[productName.trim()]) {
+              productSales[productName.trim()] = { sales: 0, revenue: 0 }
+            }
+            productSales[productName.trim()].sales += qty
+            productSales[productName.trim()].revenue += revenue
+          }
+        })
+      })
+
+    return Object.entries(productSales)
+      .map(([name, data]) => ({ name, ...data }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5)
+  }
+
+  const topProducts = getTopProducts()
+
+  // Stats với dữ liệu thực tế
+  const stats = [
+    {
+      name: 'Doanh thu',
+      value: totalRevenue.toLocaleString('vi-VN'),
+      change: totalOrders > 0 ? 'Từ đơn hàng' : 'Chưa có',
+      trend: totalRevenue > 0 ? 'up' : 'neutral' as 'up' | 'down' | 'neutral',
+      icon: DollarSign,
+      color: 'text-green-600',
+      bgColor: 'bg-green-50',
+    },
+    {
+      name: 'Đơn hàng',
+      value: totalOrders.toLocaleString('vi-VN'),
+      change: `${orders.filter(o => o.status === 'completed').length} hoàn thành`,
+      trend: totalOrders > 0 ? 'up' : 'neutral' as 'up' | 'down' | 'neutral',
+      icon: ShoppingCart,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+    },
+    {
+      name: 'Khách hàng',
+      value: totalCustomers.toLocaleString('vi-VN'),
+      change: `${customers.filter(c => c.totalOrders > 0).length} đã mua`,
+      trend: totalCustomers > 0 ? 'up' : 'neutral' as 'up' | 'down' | 'neutral',
+      icon: Users,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50',
+    },
+    {
+      name: 'Sản phẩm',
+      value: totalProducts.toLocaleString('vi-VN'),
+      change: `${products.filter(p => p.status === 'active').length} đang bán`,
+      trend: totalProducts > 0 ? 'up' : 'neutral' as 'up' | 'down' | 'neutral',
+      icon: Package,
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-50',
+    },
+  ]
   return (
     <div className="p-8 bg-gradient-to-br from-primary-50 via-white to-primary-50 min-h-screen">
       <div className="mb-8">
@@ -94,13 +201,16 @@ export default function Dashboard() {
                   <div className="flex items-center gap-1.5">
                     {stat.trend === 'up' ? (
                       <TrendingUp className="w-4 h-4 text-green-500" />
-                    ) : (
+                    ) : stat.trend === 'down' ? (
                       <TrendingDown className="w-4 h-4 text-red-500" />
-                    )}
-                    <span className={`text-sm font-semibold ${stat.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+                    ) : null}
+                    <span className={`text-sm font-semibold ${
+                      stat.trend === 'up' ? 'text-green-600' : 
+                      stat.trend === 'down' ? 'text-red-600' : 
+                      'text-gray-600'
+                    }`}>
                       {stat.change}
                     </span>
-                    <span className="text-xs text-gray-500">so với tháng trước</span>
                   </div>
                 </div>
                 <div className={`${stat.bgColor} p-4 rounded-xl shadow-sm`}>
@@ -201,7 +311,15 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {topProducts.map((product, index) => (
+              {topProducts.length === 0 ? (
+                <tr>
+                  <td colSpan={3} className="py-8 text-center text-gray-500">
+                    <Package className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                    <p>Chưa có dữ liệu bán hàng</p>
+                  </td>
+                </tr>
+              ) : (
+                topProducts.map((product, index) => (
                 <tr key={product.name} className="border-b border-gray-100 hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-colors duration-200">
                   <td className="py-4 px-4">
                     <div className="flex items-center gap-3">
@@ -221,7 +339,7 @@ export default function Dashboard() {
                     {product.revenue.toLocaleString('vi-VN')} VNĐ
                   </td>
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>
