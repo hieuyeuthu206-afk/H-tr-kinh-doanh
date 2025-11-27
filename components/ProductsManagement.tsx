@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, Search, Edit, Trash2, Package } from 'lucide-react'
+import { getStorageItem, setStorageItem, StorageKeys } from '@/utils/storage'
 
 interface Product {
   id: number
@@ -12,16 +13,10 @@ interface Product {
   status: 'active' | 'inactive'
 }
 
-const initialProducts: Product[] = [
-  { id: 1, name: 'Sản phẩm A', category: 'Điện tử', price: 500000, stock: 150, status: 'active' },
-  { id: 2, name: 'Sản phẩm B', category: 'Thời trang', price: 300000, stock: 200, status: 'active' },
-  { id: 3, name: 'Sản phẩm C', category: 'Gia dụng', price: 250000, stock: 80, status: 'active' },
-  { id: 4, name: 'Sản phẩm D', category: 'Điện tử', price: 1200000, stock: 45, status: 'active' },
-  { id: 5, name: 'Sản phẩm E', category: 'Thời trang', price: 450000, stock: 0, status: 'inactive' },
-]
-
 export default function ProductsManagement() {
-  const [products, setProducts] = useState<Product[]>(initialProducts)
+  // Load từ localStorage, nếu không có thì mảng rỗng
+  const [products, setProducts] = useState<Product[]>([])
+  const [nextId, setNextId] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
@@ -31,6 +26,28 @@ export default function ProductsManagement() {
     price: '',
     stock: '',
   })
+
+  // Load dữ liệu từ localStorage khi component mount
+  useEffect(() => {
+    const savedProducts = getStorageItem<any[]>(StorageKeys.PRODUCTS, [])
+    // Validate và cast type
+    const validProducts: Product[] = savedProducts.map(p => ({
+      ...p,
+      status: (p.status === 'active' || p.status === 'inactive') ? p.status : 'inactive'
+    }))
+    setProducts(validProducts)
+    
+    // Tìm ID lớn nhất để set nextId
+    if (validProducts.length > 0) {
+      const maxId = Math.max(...validProducts.map(p => p.id))
+      setNextId(maxId + 1)
+    }
+  }, [])
+
+  // Lưu vào localStorage mỗi khi products thay đổi
+  useEffect(() => {
+    setStorageItem(StorageKeys.PRODUCTS, products)
+  }, [products])
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -56,14 +73,16 @@ export default function ProductsManagement() {
 
   const handleDelete = (id: number) => {
     if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
-      setProducts(products.filter(p => p.id !== id))
+      const updatedProducts = products.filter(p => p.id !== id)
+      setProducts(updatedProducts)
+      // Tự động lưu qua useEffect
     }
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (editingProduct) {
-      setProducts(products.map(p =>
+      const updatedProducts: Product[] = products.map(p =>
         p.id === editingProduct.id
           ? {
               ...p,
@@ -71,13 +90,15 @@ export default function ProductsManagement() {
               category: formData.category,
               price: parseInt(formData.price),
               stock: parseInt(formData.stock),
-              status: parseInt(formData.stock) > 0 ? 'active' : 'inactive',
+              status: (parseInt(formData.stock) > 0 ? 'active' : 'inactive') as 'active' | 'inactive',
             }
           : p
-      ))
+      )
+      setProducts(updatedProducts)
+      // Tự động lưu qua useEffect
     } else {
       const newProduct: Product = {
-        id: products.length + 1,
+        id: nextId,
         name: formData.name,
         category: formData.category,
         price: parseInt(formData.price),
@@ -85,6 +106,8 @@ export default function ProductsManagement() {
         status: parseInt(formData.stock) > 0 ? 'active' : 'inactive',
       }
       setProducts([...products, newProduct])
+      setNextId(nextId + 1)
+      // Tự động lưu qua useEffect
     }
     setShowModal(false)
   }
@@ -148,7 +171,16 @@ export default function ProductsManagement() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
-              {filteredProducts.map((product) => (
+              {filteredProducts.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                    <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p className="text-lg font-medium">Chưa có sản phẩm nào</p>
+                    <p className="text-sm mt-1">Hãy thêm sản phẩm đầu tiên của bạn!</p>
+                  </td>
+                </tr>
+              ) : (
+                filteredProducts.map((product) => (
                 <tr key={product.id} className="hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-colors duration-200">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -199,7 +231,7 @@ export default function ProductsManagement() {
                     </div>
                   </td>
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>
