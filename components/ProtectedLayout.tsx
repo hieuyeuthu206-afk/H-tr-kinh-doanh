@@ -37,9 +37,9 @@ export default function ProtectedLayout({
   // Hiển thị loading khi đang kiểm tra authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-primary-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Đang tải...</p>
         </div>
       </div>
@@ -58,7 +58,7 @@ export default function ProtectedLayout({
 
   // Hiển thị layout với Sidebar cho các route được bảo vệ
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <div className="flex h-screen bg-gradient-to-br from-primary-50 via-white to-primary-50">
       <Sidebar />
       <main className="flex-1 overflow-y-auto">{children}</main>
     </div>

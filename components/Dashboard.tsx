@@ -69,9 +69,9 @@ const topProducts = [
 
 export default function Dashboard() {
   return (
-    <div className="p-8 bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen">
+    <div className="p-8 bg-gradient-to-br from-primary-50 via-white to-primary-50 min-h-screen">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent mb-2">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary-700 via-primary-600 to-primary-700 bg-clip-text text-transparent mb-2">
           Tổng quan
         </h1>
         <p className="text-gray-600 mt-2 text-lg">Chào mừng trở lại! Đây là tổng quan hoạt động kinh doanh của bạn.</p>
@@ -84,7 +84,7 @@ export default function Dashboard() {
           return (
             <div 
               key={stat.name} 
-              className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border border-gray-100 hover:border-primary-200 transform hover:-translate-y-1"
+              className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-primary-100 hover:border-primary-300 transform hover:-translate-y-1"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="flex items-center justify-between">
@@ -115,9 +115,9 @@ export default function Dashboard() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Sales Chart */}
-        <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border border-gray-100">
-          <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full"></div>
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-primary-100">
+          <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+            <div className="w-1 h-6 bg-gradient-to-b from-primary-400 to-primary-500 rounded-full"></div>
             Doanh thu theo tháng
           </h2>
           <ResponsiveContainer width="100%" height={300}>
@@ -148,9 +148,9 @@ export default function Dashboard() {
         </div>
 
         {/* Orders Chart */}
-        <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border border-gray-100">
-          <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <div className="w-1 h-6 bg-gradient-to-b from-purple-500 to-purple-600 rounded-full"></div>
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-primary-100">
+          <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+            <div className="w-1 h-6 bg-gradient-to-b from-primary-300 to-primary-400 rounded-full"></div>
             Số lượng đơn hàng
           </h2>
           <ResponsiveContainer width="100%" height={300}>
@@ -186,9 +186,9 @@ export default function Dashboard() {
       </div>
 
       {/* Top Products */}
-      <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border border-gray-100">
-        <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-          <div className="w-1 h-6 bg-gradient-to-b from-orange-500 to-orange-600 rounded-full"></div>
+      <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-primary-100">
+        <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+          <div className="w-1 h-6 bg-gradient-to-b from-primary-500 to-primary-600 rounded-full"></div>
           Sản phẩm bán chạy
         </h2>
         <div className="overflow-x-auto">
