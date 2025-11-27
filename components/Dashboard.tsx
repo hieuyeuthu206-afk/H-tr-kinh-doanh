@@ -44,9 +44,10 @@ export default function Dashboard() {
   const [products, setProducts] = useState<Product[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
   const [orders, setOrders] = useState<Order[]>([])
+  const [refreshKey, setRefreshKey] = useState(0)
 
-  // Load dữ liệu từ localStorage
-  useEffect(() => {
+  // Hàm load dữ liệu từ localStorage
+  const loadData = () => {
     const savedProducts = getStorageItem<any[]>(StorageKeys.PRODUCTS, [])
     const savedCustomers = getStorageItem<any[]>(StorageKeys.CUSTOMERS, [])
     const savedOrders = getStorageItem<any[]>(StorageKeys.ORDERS, [])
@@ -58,6 +59,30 @@ export default function Dashboard() {
 
     setCustomers(savedCustomers)
     setOrders(savedOrders)
+  }
+
+  // Load dữ liệu từ localStorage khi component mount
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  // Tự động reload khi window focus (khi quay lại tab)
+  useEffect(() => {
+    const handleFocus = () => {
+      loadData()
+    }
+
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
+  }, [])
+
+  // Reload dữ liệu mỗi 2 giây để đảm bảo cập nhật real-time
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadData()
+    }, 2000)
+
+    return () => clearInterval(interval)
   }, [])
 
   // Tính toán số liệu thực tế
@@ -175,13 +200,23 @@ export default function Dashboard() {
       bgColor: 'bg-orange-50',
     },
   ]
+
   return (
     <div className="p-8 bg-gradient-to-br from-primary-50 via-white to-primary-50 min-h-screen">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary-700 via-primary-600 to-primary-700 bg-clip-text text-transparent mb-2">
-          Tổng quan
-        </h1>
-        <p className="text-gray-600 mt-2 text-lg">Chào mừng trở lại! Đây là tổng quan hoạt động kinh doanh của bạn.</p>
+      <div className="mb-8 flex justify-between items-start">
+        <div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary-700 via-primary-600 to-primary-700 bg-clip-text text-transparent mb-2">
+            Tổng quan
+          </h1>
+          <p className="text-gray-600 mt-2 text-lg">Chào mừng trở lại! Đây là tổng quan hoạt động kinh doanh của bạn.</p>
+        </div>
+        <button
+          onClick={loadData}
+          className="px-4 py-2 bg-white border border-primary-200 rounded-xl hover:bg-primary-50 text-primary-600 font-medium transition-all duration-200 shadow-sm hover:shadow-md"
+          title="Làm mới dữ liệu"
+        >
+          🔄 Làm mới
+        </button>
       </div>
 
       {/* Stats Grid */}
