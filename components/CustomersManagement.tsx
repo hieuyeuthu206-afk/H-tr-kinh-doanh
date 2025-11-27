@@ -83,7 +83,7 @@ export default function CustomersManagement() {
   }
 
   return (
-    <div className="p-8 bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen">
+    <div className="p-8 bg-gradient-to-br from-primary-50 via-white to-primary-50 min-h-screen">
       <div className="mb-8 flex justify-between items-center">
         <div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent mb-2">
@@ -93,7 +93,7 @@ export default function CustomersManagement() {
         </div>
         <button
           onClick={handleAdd}
-          className="flex items-center gap-2 bg-gradient-to-r from-primary-600 to-primary-700 text-white px-6 py-3 rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all duration-200 shadow-lg shadow-primary-200 hover:shadow-xl hover:shadow-primary-300 transform hover:-translate-y-0.5 font-semibold"
+          className="flex items-center gap-2 bg-gradient-to-r from-primary-400 to-primary-500 text-white px-6 py-3 rounded-xl hover:from-primary-500 hover:to-primary-600 transition-all duration-200 shadow-lg shadow-primary-200/50 hover:shadow-xl hover:shadow-primary-300/50 transform hover:-translate-y-0.5 font-semibold"
         >
           <Plus className="w-5 h-5" />
           Thêm khách hàng

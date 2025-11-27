@@ -36,12 +36,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #0ea5e9, #0284c7);
+  background: linear-gradient(to bottom, #14b8a6, #0d9488);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, #0284c7, #0369a1);
+  background: linear-gradient(to bottom, #0d9488, #0f766e);
 }
 
 /* Smooth animations */

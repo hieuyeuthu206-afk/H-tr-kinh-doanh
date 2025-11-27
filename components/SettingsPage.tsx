@@ -23,7 +23,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-8 bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen">
+    <div className="p-8 bg-gradient-to-br from-primary-50 via-white to-primary-50 min-h-screen">
       <div className="mb-8">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent mb-2">
           Cài đặt
@@ -33,7 +33,7 @@ export default function SettingsPage() {
 
       <div className="space-y-6">
         {/* Business Information */}
-        <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border border-gray-100">
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-primary-100">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-sm">
               <User className="w-6 h-6 text-white" />
@@ -89,7 +89,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Preferences */}
-        <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border border-gray-100">
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-primary-100">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-sm">
               <Globe className="w-6 h-6 text-white" />
@@ -128,7 +128,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Notifications */}
-        <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border border-gray-100">
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-primary-100">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-sm">
               <Bell className="w-6 h-6 text-white" />
@@ -182,7 +182,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Security */}
-        <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border border-gray-100">
+        <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-primary-100">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-sm">
               <Shield className="w-6 h-6 text-white" />
@@ -224,7 +224,7 @@ export default function SettingsPage() {
         <div className="flex justify-end">
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 bg-gradient-to-r from-primary-600 to-primary-700 text-white px-8 py-3 rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all duration-200 shadow-lg shadow-primary-200 hover:shadow-xl hover:shadow-primary-300 transform hover:-translate-y-0.5 font-semibold"
+            className="flex items-center gap-2 bg-gradient-to-r from-primary-400 to-primary-500 text-white px-8 py-3 rounded-xl hover:from-primary-500 hover:to-primary-600 transition-all duration-200 shadow-lg shadow-primary-200/50 hover:shadow-xl hover:shadow-primary-300/50 transform hover:-translate-y-0.5 font-semibold"
           >
             <Save className="w-5 h-5" />
             Lưu cài đặt

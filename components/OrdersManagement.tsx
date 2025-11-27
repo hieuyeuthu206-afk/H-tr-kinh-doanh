@@ -59,7 +59,7 @@ export default function OrdersManagement() {
   }
 
   return (
-    <div className="p-8 bg-gradient-to-br from-gray-50 via-white to-gray-50 min-h-screen">
+    <div className="p-8 bg-gradient-to-br from-primary-50 via-white to-primary-50 min-h-screen">
       <div className="mb-8">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent mb-2">
           Quản lý đơn hàng
@@ -93,7 +93,7 @@ export default function OrdersManagement() {
       </div>
 
       {/* Orders Table */}
-      <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
+      <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-primary-100">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
