@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, Search, Edit, Trash2, User, Mail, Phone } from 'lucide-react'
+import { getStorageItem, setStorageItem, StorageKeys } from '@/utils/storage'
 
 interface Customer {
   id: number
@@ -13,16 +14,9 @@ interface Customer {
   totalSpent: number
 }
 
-const initialCustomers: Customer[] = [
-  { id: 1, name: 'Nguyễn Văn A', email: 'nguyenvana@email.com', phone: '0901234567', address: 'Hà Nội', totalOrders: 15, totalSpent: 5000000 },
-  { id: 2, name: 'Trần Thị B', email: 'tranthib@email.com', phone: '0912345678', address: 'TP.HCM', totalOrders: 8, totalSpent: 3200000 },
-  { id: 3, name: 'Lê Văn C', email: 'levanc@email.com', phone: '0923456789', address: 'Đà Nẵng', totalOrders: 22, totalSpent: 8500000 },
-  { id: 4, name: 'Phạm Thị D', email: 'phamthid@email.com', phone: '0934567890', address: 'Hải Phòng', totalOrders: 5, totalSpent: 1500000 },
-  { id: 5, name: 'Hoàng Văn E', email: 'hoangvane@email.com', phone: '0945678901', address: 'Cần Thơ', totalOrders: 12, totalSpent: 4200000 },
-]
-
 export default function CustomersManagement() {
-  const [customers, setCustomers] = useState<Customer[]>(initialCustomers)
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [nextId, setNextId] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
@@ -32,6 +26,23 @@ export default function CustomersManagement() {
     phone: '',
     address: '',
   })
+
+  // Load dữ liệu từ localStorage khi component mount
+  useEffect(() => {
+    const savedCustomers = getStorageItem<Customer[]>(StorageKeys.CUSTOMERS, [])
+    setCustomers(savedCustomers)
+    
+    // Tìm ID lớn nhất để set nextId
+    if (savedCustomers.length > 0) {
+      const maxId = Math.max(...savedCustomers.map(c => c.id))
+      setNextId(maxId + 1)
+    }
+  }, [])
+
+  // Lưu vào localStorage mỗi khi customers thay đổi
+  useEffect(() => {
+    setStorageItem(StorageKeys.CUSTOMERS, customers)
+  }, [customers])
 
   const filteredCustomers = customers.filter(customer =>
     customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -58,26 +69,32 @@ export default function CustomersManagement() {
 
   const handleDelete = (id: number) => {
     if (confirm('Bạn có chắc chắn muốn xóa khách hàng này?')) {
-      setCustomers(customers.filter(c => c.id !== id))
+      const updatedCustomers = customers.filter(c => c.id !== id)
+      setCustomers(updatedCustomers)
+      // Tự động lưu qua useEffect
     }
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (editingCustomer) {
-      setCustomers(customers.map(c =>
+      const updatedCustomers = customers.map(c =>
         c.id === editingCustomer.id
           ? { ...c, ...formData }
           : c
-      ))
+      )
+      setCustomers(updatedCustomers)
+      // Tự động lưu qua useEffect
     } else {
       const newCustomer: Customer = {
-        id: customers.length + 1,
+        id: nextId,
         ...formData,
         totalOrders: 0,
         totalSpent: 0,
       }
       setCustomers([...customers, newCustomer])
+      setNextId(nextId + 1)
+      // Tự động lưu qua useEffect
     }
     setShowModal(false)
   }
@@ -115,8 +132,22 @@ export default function CustomersManagement() {
       </div>
 
       {/* Customers Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCustomers.map((customer) => (
+      {filteredCustomers.length === 0 ? (
+        <div className="bg-white rounded-xl shadow-lg p-12 text-center border border-primary-100">
+          <User className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+          <p className="text-lg font-medium text-gray-700 mb-1">Chưa có khách hàng nào</p>
+          <p className="text-sm text-gray-500 mb-6">Hãy thêm khách hàng đầu tiên của bạn!</p>
+          <button
+            onClick={handleAdd}
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-primary-400 to-primary-500 text-white px-6 py-3 rounded-xl hover:from-primary-500 hover:to-primary-600 transition-all duration-200 shadow-lg shadow-primary-200/50 hover:shadow-xl transform hover:-translate-y-0.5 font-semibold"
+          >
+            <Plus className="w-5 h-5" />
+            Thêm khách hàng đầu tiên
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredCustomers.map((customer) => (
           <div key={customer.id} className="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition-all duration-300 border border-gray-100 transform hover:-translate-y-1">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
@@ -167,7 +198,8 @@ export default function CustomersManagement() {
             </div>
           </div>
         ))}
-      </div>
+        </div>
+      )}
 
       {/* Modal */}
       {showModal && (

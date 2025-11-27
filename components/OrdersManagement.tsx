@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { Search, Eye, Package, CheckCircle, XCircle, Clock } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Search, Eye, Package, CheckCircle, XCircle, Clock, ShoppingCart } from 'lucide-react'
+import { getStorageItem, setStorageItem, StorageKeys } from '@/utils/storage'
 
 interface Order {
   id: number
@@ -12,20 +13,29 @@ interface Order {
   status: 'pending' | 'processing' | 'completed' | 'cancelled'
 }
 
-const initialOrders: Order[] = [
-  { id: 1, customerName: 'Nguyễn Văn A', products: 'Sản phẩm A x2, Sản phẩm B x1', total: 1300000, date: '2024-01-15', status: 'completed' },
-  { id: 2, customerName: 'Trần Thị B', products: 'Sản phẩm C x3', total: 750000, date: '2024-01-16', status: 'processing' },
-  { id: 3, customerName: 'Lê Văn C', products: 'Sản phẩm D x1', total: 1200000, date: '2024-01-16', status: 'pending' },
-  { id: 4, customerName: 'Phạm Thị D', products: 'Sản phẩm A x1, Sản phẩm E x2', total: 1400000, date: '2024-01-17', status: 'processing' },
-  { id: 5, customerName: 'Hoàng Văn E', products: 'Sản phẩm B x4', total: 1200000, date: '2024-01-17', status: 'completed' },
-  { id: 6, customerName: 'Nguyễn Văn A', products: 'Sản phẩm C x2', total: 500000, date: '2024-01-18', status: 'cancelled' },
-]
-
 export default function OrdersManagement() {
-  const [orders, setOrders] = useState<Order[]>(initialOrders)
+  const [orders, setOrders] = useState<Order[]>([])
+  const [nextId, setNextId] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+
+  // Load dữ liệu từ localStorage khi component mount
+  useEffect(() => {
+    const savedOrders = getStorageItem<Order[]>(StorageKeys.ORDERS, [])
+    setOrders(savedOrders)
+    
+    // Tìm ID lớn nhất để set nextId
+    if (savedOrders.length > 0) {
+      const maxId = Math.max(...savedOrders.map(o => o.id))
+      setNextId(maxId + 1)
+    }
+  }, [])
+
+  // Lưu vào localStorage mỗi khi orders thay đổi
+  useEffect(() => {
+    setStorageItem(StorageKeys.ORDERS, orders)
+  }, [orders])
 
   const filteredOrders = orders.filter(order => {
     const matchesSearch = order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -52,10 +62,12 @@ export default function OrdersManagement() {
   }
 
   const updateOrderStatus = (id: number, newStatus: Order['status']) => {
-    setOrders(orders.map(order =>
+    const updatedOrders = orders.map(order =>
       order.id === id ? { ...order, status: newStatus } : order
-    ))
+    )
+    setOrders(updatedOrders)
     setSelectedOrder(null)
+    // Tự động lưu qua useEffect
   }
 
   return (
@@ -122,7 +134,16 @@ export default function OrdersManagement() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
-              {filteredOrders.map((order) => (
+              {filteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                    <ShoppingCart className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p className="text-lg font-medium">Chưa có đơn hàng nào</p>
+                    <p className="text-sm mt-1">Đơn hàng sẽ được hiển thị ở đây khi có</p>
+                  </td>
+                </tr>
+              ) : (
+                filteredOrders.map((order) => (
                 <tr key={order.id} className="hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-colors duration-200">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="font-medium text-gray-900">#{order.id.toString().padStart(6, '0')}</span>
@@ -145,7 +166,7 @@ export default function OrdersManagement() {
                     </button>
                   </td>
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>
