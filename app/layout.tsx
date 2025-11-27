@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import Sidebar from '@/components/Sidebar'
+import { AuthProvider } from '@/contexts/AuthContext'
+import ProtectedLayout from '@/components/ProtectedLayout'
 
 const inter = Inter({ subsets: ['latin', 'vietnamese'] })
 
@@ -18,12 +19,9 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body className={inter.className}>
-        <div className="flex h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-          <Sidebar />
-          <main className="flex-1 overflow-y-auto">
-            {children}
-          </main>
-        </div>
+        <AuthProvider>
+          <ProtectedLayout>{children}</ProtectedLayout>
+        </AuthProvider>
       </body>
     </html>
   )
